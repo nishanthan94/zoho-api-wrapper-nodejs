@@ -1,0 +1,8 @@
+{
+	"command": "node src/server.js",
+	"build_path": "/var/www/html/nodejs/zoho-project-integration",
+	"stack": "node20",
+	"env_variables": {},
+	"memory": 256,
+	"scripts": {}
+}

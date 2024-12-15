@@ -18,11 +18,11 @@ class ZohoAuthService {
             access_type: 'offline',
             prompt: 'consent'
         });
-
-        return `${this.config.auth_url}?${params.toString()}`;
+        const baseUrl = this.config.endpoints[this.config.defaultRegion];
+        return `${baseUrl}${this.config.paths.auth}?${params.toString()}`;
     }
 
-    async getAccessToken(code) {
+    async getAccessToken(code, metadata = {}) {
         try {
             const params = new URLSearchParams({
                 code: code,
@@ -31,16 +31,17 @@ class ZohoAuthService {
                 redirect_uri: this.config.redirect_uri,
                 grant_type: 'authorization_code'
             });
+            const baseUrl = metadata.accountsServer || this.config.endpoints[metadata.location] || this.config.endpoints[this.config.defaultRegion];
+            const tokenUrl = `${baseUrl}${this.config.paths.token}`;
 
-            const response = await axios.post(this.config.token_url, params);
+            const response = await axios.post(tokenUrl, params);
 
-            // Add scope to token data if not provided by Zoho
             const tokenData = {
                 ...response.data,
-                scope: response.data.scope || this.config.scope
+                scope: response.data.scope || this.config.scope,
+                providerMetadata: metadata
             };
 
-            // Save token using generic service
             await oauthTokenService.saveToken(this.provider, tokenData);
 
             return tokenData;
@@ -50,8 +51,23 @@ class ZohoAuthService {
         }
     }
 
-    async refreshAccessToken(refreshToken) {
+
+    async refreshAccessToken(refreshToken, existingTokenData = null) {
         try {
+            let metadata = {};
+            if (existingTokenData) {
+                metadata = existingTokenData.providerMetadata || {};
+            } else {
+                const currentToken = await oauthTokenService.getToken(this.provider);
+                metadata = currentToken.providerMetadata || {};
+            }
+
+            const baseUrl = metadata.accountsServer ||
+                this.config.endpoints[metadata.location] ||
+                this.config.endpoints[this.config.defaultRegion];
+
+            const refreshUrl = `${baseUrl}${this.config.paths.token}`;
+
             const params = new URLSearchParams({
                 refresh_token: refreshToken,
                 client_id: this.config.client_id,
@@ -59,20 +75,19 @@ class ZohoAuthService {
                 grant_type: 'refresh_token'
             });
 
-            const response = await axios.post(this.config.refresh_url, params);
+            const response = await axios.post(refreshUrl, params);
 
-            // Add scope to token data if not provided by Zoho
-            const tokenData = {
+            return {
                 ...response.data,
-                scope: response.data.scope || this.config.scope
+                scope: response.data.scope || this.config.scope,
+                providerMetadata: metadata // Preserve existing metadata
             };
-
-            return tokenData;
         } catch (error) {
             Log.error('Error refreshing token', error);
             throw new Error(error.response?.data?.message || 'Failed to refresh token');
         }
     }
+
 
     async getCurrentToken() {
         try {

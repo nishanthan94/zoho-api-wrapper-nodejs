@@ -1,4 +1,3 @@
-// src/models/oauthToken.model.js
 const mongoose = require('mongoose');
 const encryption = require('../utils/encryption');
 
@@ -6,7 +5,7 @@ const oauthTokenSchema = new mongoose.Schema({
     provider: {
         type: String,
         required: true,
-        enum: ['zoho', 'google', 'microsoft', 'slack'], // Add more providers as needed
+        enum: ['zoho', 'google'],
         index: true
     },
     accessToken: {
@@ -33,6 +32,10 @@ const oauthTokenSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
+    providerMetadata: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {}
+    },
     isActive: {
         type: Boolean,
         default: true
@@ -43,7 +46,6 @@ const oauthTokenSchema = new mongoose.Schema({
     toObject: { getters: true }
 });
 
-// Compound index for provider queries
 oauthTokenSchema.index({ provider: 1, isActive: 1 });
 
 const OAuthToken = mongoose.model('OAuthToken', oauthTokenSchema);

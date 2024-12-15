@@ -20,7 +20,7 @@ const createTokenVerifier = (provider) => {
                 }
 
                 // Refresh the token
-                const newTokenData = await authService.refreshAccessToken(tokenDoc.refreshToken);
+                const newTokenData = await authService.refreshAccessToken(tokenDoc.refreshToken, tokenDoc);
                 const updatedToken = await oauthTokenService.updateAccessToken(provider, newTokenData);
 
                 // Add the fresh token to request

@@ -20,7 +20,7 @@ class OAuthTokenService {
                 tokenType: tokenData.token_type || 'Bearer',
                 scope: tokenData.scope,
                 expiresAt,
-                additionalData: tokenData.additional_data || {},
+                providerMetadata: tokenData.providerMetadata || {},
                 isActive: true
             });
 
@@ -58,7 +58,7 @@ class OAuthTokenService {
                 {
                     accessToken: tokenData.access_token,
                     expiresAt,
-                    ...(tokenData.additional_data && { additionalData: tokenData.additional_data })
+                    ...(tokenData.providerMetadata && { providerMetadata: tokenData.providerMetadata })
                 },
                 { new: true }
             );

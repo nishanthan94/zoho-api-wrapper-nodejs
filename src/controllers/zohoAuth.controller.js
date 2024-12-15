@@ -51,15 +51,16 @@ class ZohoAuthController {
      */
     async handleCallback(req, res) {
         try {
-            const { code, error: authError, error_description: errorDesc } = req.query;
+            const { code, error: authError, error_description: errorDesc, location, 'accounts-server': accountsServer } = req.query;
 
             Log.info('Received OAuth callback', {
                 hasCode: !!code,
                 hasError: !!authError,
+                location,
+                accountsServer,
                 ip: req.ip
             });
 
-            // Handle OAuth error response
             if (authError) {
                 Log.error('OAuth callback returned error', new Error(errorDesc || authError), {
                     error: authError,
@@ -76,11 +77,14 @@ class ZohoAuthController {
             }
 
             Log.info('Exchanging authorization code for tokens', {
-                code: `${code.substring(0, 4)}...` // Log only first 4 chars for security
+                code: `${code.substring(0, 4)}...`
             });
 
             // Get tokens from Zoho
-            const tokenData = await zohoAuthService.getAccessToken(code);
+            const tokenData = await zohoAuthService.getAccessToken(code, {
+                location,
+                accountsServer
+            });
 
             Log.info('Successfully obtained access token', {
                 scope: tokenData.scope,
@@ -125,8 +129,7 @@ class ZohoAuthController {
                 tokenId: tokenDoc._id,
                 expiresAt: tokenDoc.expiresAt
             });
-
-            const newTokenData = await zohoAuthService.refreshAccessToken(tokenDoc.refreshToken);
+            const newTokenData = await zohoAuthService.refreshAccessToken(tokenDoc.refreshToken, tokenDoc);
             const updatedToken = await oauthTokenService.updateAccessToken('zoho', newTokenData);
 
             Log.info('Successfully refreshed access token', {
