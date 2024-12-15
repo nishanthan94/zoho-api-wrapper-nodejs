@@ -25,9 +25,11 @@ const createTokenVerifier = (provider) => {
 
                 // Add the fresh token to request
                 req.oauthToken = updatedToken.accessToken;
+                req.tokenMetadata = updatedToken.providerMetadata;
             } else {
                 // Token is still valid
                 req.oauthToken = tokenDoc.accessToken;
+                req.tokenMetadata = tokenDoc.providerMetadata;
             }
 
             // Add provider info to request

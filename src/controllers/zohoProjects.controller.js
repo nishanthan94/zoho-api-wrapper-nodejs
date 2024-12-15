@@ -16,7 +16,7 @@ class ZohoProjectsController {
     async getPortals(req, res) {
         try {
             Log.info('Fetching Zoho portals', { userId: req.user?.id });
-            const portalsData = await zohoProjectsService.getPortals(req.oauthToken);
+            const portalsData = await zohoProjectsService.getPortals(req.oauthToken, req.tokenMetadata);
 
             Log.info('Successfully fetched Zoho portals', {
                 portalCount: portalsData.length,
@@ -69,8 +69,11 @@ class ZohoProjectsController {
                 userId: req.user?.id
             });
 
-            const projectsData = await zohoProjectsService.getAllProjects(portalId, req.oauthToken);
-
+            const projectsData = await zohoProjectsService.getAllProjects(
+                portalId,
+                req.oauthToken,
+                req.tokenMetadata
+            );
             Log.info('Successfully fetched projects', {
                 portalId,
                 projectCount: projectsData.length,
@@ -127,7 +130,12 @@ class ZohoProjectsController {
                 userId: req.user?.id
             });
 
-            const projectData = await zohoProjectsService.getProjectDetails(portalId, projectId, req.oauthToken);
+            const projectData = await zohoProjectsService.getProjectDetails(
+                portalId,
+                projectId,
+                req.oauthToken,
+                req.tokenMetadata
+            );
 
             Log.info('Successfully fetched project details', {
                 portalId,

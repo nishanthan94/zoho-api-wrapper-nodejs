@@ -1,7 +1,6 @@
 const winston = require('winston');
 const morgan = require('morgan');
 const path = require('path');
-console.log(path.join(__dirname, '../logs/combined.log'));
 class Log {
     static #logger = winston.createLogger({
         level: 'info',
