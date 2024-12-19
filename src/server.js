@@ -11,8 +11,16 @@ const zohoProjectsRoutes = require('./routes/zohoProjects.routes');
 const app = express();
 
 // Middleware
-app.use(helmet()); // Security headers
-app.use(cors()); // Enable CORS
+// Security headers
+app.use(cors({
+    origin: 'https://zoho-project-integration-60035413283.development.catalystserverless.in',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allow necessary HTTP methods
+    allowedHeaders: ['Content-Type', 'Authorization'], // Allow necessary headers
+    credentials: true, // Allow cookies or authentication headers
+}));
+app.options('*', cors());
+
+app.use(helmet());
 app.use(morgan('dev')); // Request logging
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
@@ -21,6 +29,12 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 mongoose.connect(process.env.MONGODB_URI)
     .then(() => console.log('Connected to MongoDB'))
     .catch((err) => console.error('MongoDB connection error:', err));
+
+app.use((req, res, next) => {
+    console.log(`Incoming request: ${req.method} ${req.url}`);
+    console.log('Headers:', req.headers);
+    next();
+});
 
 app.get('/api/health', (req, res) => {
     res.status(200).json({ status: 'ok', message: 'Server is running' });

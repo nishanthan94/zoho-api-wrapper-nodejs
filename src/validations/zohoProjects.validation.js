@@ -24,4 +24,15 @@ const bodySchema = Joi.object({
     currency: Joi.string(),
 });
 
-module.exports = { paramsSchema, bodySchema };
+const projectSchema = Joi.object({
+    portalId: Joi.string().required().messages({
+        'string.empty': 'Portal ID is required',
+        'any.required': 'Portal ID is required',
+    }),
+    projectId: Joi.string().required().messages({
+        'string.empty': 'Portal ID is required',
+        'any.required': 'Portal ID is required',
+    }),
+});
+
+module.exports = { paramsSchema, bodySchema, projectSchema };

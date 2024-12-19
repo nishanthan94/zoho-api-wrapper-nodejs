@@ -321,6 +321,53 @@ class ZohoProjectsController {
             });
         }
     }
+
+    async deleteProject(req, res) {
+        try {
+            const { portalId, projectId } = req.params;
+
+            if (!portalId || !projectId) {
+                Log.error('Missing portal/project ID in request', new Error('portal/project ID is required'), {
+                    userId: req.user?.id,
+                    endpoint: 'createProject'
+                });
+
+                return res.status(400).json({
+                    success: false,
+                    error: 'portal/project ID is required'
+                });
+            }
+
+            const response = await zohoProjectsService.deleteProject(
+                portalId,
+                projectId,
+                req.oauthToken,
+                req.tokenMetadata
+            );
+
+            Log.info('Successfully deleted project', {
+                portalId,
+                userId: req.user?.id
+            });
+
+            res.json({
+                success: true,
+                data: response.data
+            });
+        } catch (error) {
+            Log.error('Failed to delete project', error, {
+                portalId: req.params.portalId,
+                endpoint: 'createProject'
+            });
+
+            const statusCode = error.message.includes('Unauthorized') ? 401 : 500;
+            res.status(statusCode).json({
+                success: false,
+                error: 'Failed to create project',
+                details: error.message
+            });
+        }
+    }
 }
 
 module.exports = new ZohoProjectsController();

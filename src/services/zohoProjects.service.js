@@ -149,6 +149,23 @@ class ZohoProjectsService {
             throw error;
         }
     }
+    async deleteProject(portalId, projectId, accessToken, tokenMetadata) {
+        try {
+            const baseUrl = this.getBaseUrl(tokenMetadata);
+            const url = `${baseUrl}/portal/${portalId}${this.config.paths.projects.projects}/${projectId}/`;
+            
+            const config = this.getRequestConfig(accessToken);
+
+            return await axios.delete(url, config);
+        } catch (error) {
+            Log.error('Failed to delete project', error, {
+                portalId,
+                errorResponse: error.response?.data
+            });
+            throw error;
+        }
+    }
+    
 }
 
 module.exports = new ZohoProjectsService();
