@@ -162,6 +162,165 @@ class ZohoProjectsController {
             });
         }
     }
+
+    // Add this method to ZohoProjectsController class
+
+    /**
+     * Creates a new project in a specific portal
+     * @param {Object} req - Express request object
+     * @param {Object} res - Express response object
+     * @returns {Promise<void>}
+     */
+    async createProject(req, res) {
+        try {
+            const { portalId } = req.params;
+            const projectData = {
+                name: req.body.name,
+                description: req.body.description,
+                start_date: req.body.start_date,
+                end_date: req.body.end_date,
+                strict_project: req.body.strict_project,
+                currency: req.body.currency
+            };
+
+            if (!portalId) {
+                Log.error('Missing portal ID in request', new Error('Portal ID is required'), {
+                    userId: req.user?.id,
+                    endpoint: 'createProject'
+                });
+
+                return res.status(400).json({
+                    success: false,
+                    error: 'Portal ID is required'
+                });
+            }
+
+            if (!projectData.name) {
+                Log.error('Missing project name in request', new Error('Project name is required'), {
+                    userId: req.user?.id,
+                    endpoint: 'createProject'
+                });
+
+                return res.status(400).json({
+                    success: false,
+                    error: 'Project name is required'
+                });
+            }
+
+            Log.info('Creating new project', {
+                portalId,
+                projectName: projectData.name,
+                userId: req.user?.id
+            });
+
+            const response = await zohoProjectsService.createProject(
+                portalId,
+                projectData,
+                req.oauthToken,
+                req.tokenMetadata
+            );
+
+            Log.info('Successfully created project', {
+                portalId,
+                projectName: projectData.name,
+                userId: req.user?.id
+            });
+
+            res.json({
+                success: true,
+                data: response.data
+            });
+        } catch (error) {
+            Log.error('Failed to create project', error, {
+                portalId: req.params.portalId,
+                userId: req.user?.id,
+                endpoint: 'createProject'
+            });
+
+            const statusCode = error.message.includes('Unauthorized') ? 401 : 500;
+            res.status(statusCode).json({
+                success: false,
+                error: 'Failed to create project',
+                details: error.message
+            });
+        }
+    }
+
+    async updateProject(req, res) {
+        try {
+            const { portalId, projectId } = req.params;
+            const projectData = {
+                name: req.body.name,
+                description: req.body.description,
+                start_date: req.body.start_date,
+                end_date: req.body.end_date,
+                strict_project: req.body.strict_project,
+                currency: req.body.currency
+            };
+
+            if (!portalId) {
+                Log.error('Missing portal ID in request', new Error('Portal ID is required'), {
+                    userId: req.user?.id,
+                    endpoint: 'createProject'
+                });
+
+                return res.status(400).json({
+                    success: false,
+                    error: 'Portal ID is required'
+                });
+            }
+
+            if (!projectData.name) {
+                Log.error('Missing project name in request', new Error('Project name is required'), {
+                    userId: req.user?.id,
+                    endpoint: 'createProject'
+                });
+
+                return res.status(400).json({
+                    success: false,
+                    error: 'Project name is required'
+                });
+            }
+
+            Log.info('Creating new project', {
+                portalId,
+                projectName: projectData.name,
+                userId: req.user?.id
+            });
+
+            const response = await zohoProjectsService.updateProject(
+                portalId,
+                projectId,
+                projectData,
+                req.oauthToken,
+                req.tokenMetadata
+            );
+
+            Log.info('Successfully created project', {
+                portalId,
+                projectName: projectData.name,
+                userId: req.user?.id
+            });
+
+            res.json({
+                success: true,
+                data: response.data
+            });
+        } catch (error) {
+            Log.error('Failed to create project', error, {
+                portalId: req.params.portalId,
+                userId: req.user?.id,
+                endpoint: 'createProject'
+            });
+
+            const statusCode = error.message.includes('Unauthorized') ? 401 : 500;
+            res.status(statusCode).json({
+                success: false,
+                error: 'Failed to create project',
+                details: error.message
+            });
+        }
+    }
 }
 
 module.exports = new ZohoProjectsController();
